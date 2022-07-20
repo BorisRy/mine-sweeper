@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/style.css">
+    </head>
+    <body onload="gameInit() " oncontextmenu="return false;">
+        <h1>MINE SWEEPER</h1>
+        <div class="board-container">
+            <div class="difficulty">
+                <p data-diff="0" onclick="changeDifficulty(this)">EASY</p>
+                <p data-diff="1" onclick="changeDifficulty(this)">MEDIUM</p>
+                <p data-diff="2" onclick="changeDifficulty(this)">EXPERT</p>
+            </div>
+            <div class="game-info">
+                <p class="time">000</p>
+                <p id="restart" onclick="gameInit()"><img src="images/1.png"> </p>
+                <p class="flags">12</p>
+            </div>
+            
+            <table class="game-board"></table>
+        </div>
+        
+        <script src="js/utils.js"></script>
+        <script src="js/minesweeper.js"></script>
+    </body>
+</html>
