@@ -340,11 +340,15 @@ function revealAllMines() {
 }
 
 function resetGame() {
-    var restartButton = document.querySelector('#restart')
-    var safeClicksLeft = document.querySelector('.clicks-left')
     var elSafeButton = document.querySelector('p[onclick="safeButton(this)"]')
+    console.log('elSafeButton:', elSafeButton)
+    elSafeButton.classList.remove('deactivated')
     elSafeButton.classList.add('hover-effect')
     elSafeButton.classList.add('active')
+
+
+    var restartButton = document.querySelector('#restart')
+    var safeClicksLeft = document.querySelector('.clicks-left')
     restartButton.innerHTML = '<img src="images/1.png">'
     gGame = {
         isOn: true,

@@ -19,13 +19,13 @@ function safeButton(elSafeButton) {
                     renderCell({ i: randI, j: randJ }, EMPTY)
                     elCell.classList.add('covered')
                     if (gSafeLeft === 0) {
-                        elSafeButton.style.color = 'rgb(52, 49, 49)'
+                        elSafeButton.classList.remove('active')
+                        elSafeButton.classList.add('deactivated')
                         elSafeButton.classList.remove('hover-effect')
                     }
                 }, 500)
                 break
             }
-
             amountOfCells--
             if (amountOfCells <= 0) break
         }
