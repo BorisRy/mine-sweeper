@@ -46,8 +46,7 @@ function renderBoard(board) {
                         class="${className}" 
                         onclick="cellClicked(this)"
                         ${rightClick}
-                        >
-                        ${getGameElement(cell)}               
+                        >              
                         </td>`
         }
         strHtml += '</tr>';
@@ -86,6 +85,7 @@ function cellClicked(elCell) {
             startTimer()
             gIsFirstClick = false
             gMinesCoors = []
+            console.log('gDifficulty.mines for cellClicked:', gDifficulty.mines)
             placeMines(cellLocation, gDifficulty.mines)
             countMineNeighbours()
 
@@ -149,7 +149,8 @@ function onCellRightClick(elCell) {
         elCell.classList.add('covered')
         isGameWon()
     }
-
+    console.log(gBoard)
+    console.log(getMines())
 }
 
 function renderCell(location, value) {
@@ -172,17 +173,21 @@ function placeMines(initialLocation, numberOfMines) {
     // so there won't be a bomb in the initial click
     nbrsOfInitialClicked.push(gBoard[initialLocation.i][initialLocation.j])
     var mines = numberOfMines
-
+    console.log('numberOfMines from placeMines():', numberOfMines)
     while (mines > 0) {
         var randI = getRandomInt(0, gBoard.length)
         var randJ = getRandomInt(0, gBoard[0].length)
         var cell = gBoard[randI][randJ]
-        if (!nbrsOfInitialClicked.includes(cell)) {
+        if (!nbrsOfInitialClicked.includes(cell) && !cell.isMine) {
+            console.log(`mines added: ${mines}`)
+            console.log('cell:', cell)
             cell.isMine = true
             mines--
             gMinesCoors.push({ i: randI, j: randJ })
         }
     }
+    console.log('gMinesCoors:', gMinesCoors)
+    console.log('from placeMines', getMines())
 }
 
 function countMineNeighbours() {
@@ -340,7 +345,6 @@ function resetGame() {
     var elSafeButton = document.querySelector('p[onclick="safeButton(this)"]')
     elSafeButton.classList.add('hover-effect')
     elSafeButton.classList.add('active')
-
     restartButton.innerHTML = '<img src="images/1.png">'
     gGame = {
         isOn: true,
