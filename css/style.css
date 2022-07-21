@@ -2,7 +2,7 @@ body {
     background-color: black;
     color: white;
     font-family: 'Orbitron', sans-serif;
-    zoom: 1.7;
+    zoom: 110%;
 }
 
 h1{
@@ -51,7 +51,7 @@ h1{
     height: 100%;
     text-align: center;
     margin: auto;
-    background: linear-gradient(to right, #0f0f0f, #202020);
+    background: linear-gradient(to right, #191919, #202020);
     border-radius: 16px;
     min-width: 500px;
     box-sizing: border-box;
@@ -101,6 +101,7 @@ img {
     width: 10px;
     height: 10px;
     border-radius: 50px;
+    
 }
 td {
     box-sizing: border-box;
@@ -170,6 +171,7 @@ p {
     height: 30px;
     margin-bottom: 7px;
     transition: 1s;
+    
 }
 
 .heart {

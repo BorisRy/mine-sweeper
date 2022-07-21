@@ -248,7 +248,7 @@ function revealDigitsWhenHitEmpty() {
             var cell = gBoard[i][j]
             var elCell = document.querySelector(`#${getIdOfCell({ i, j })}`)
             var cellAdjecntEmpty = getNeighbours(gBoard, i, j).filter(cell => cell.isShown && cell.minesAroundCount === 0)
-            if (cell.minesAroundCount > 0 && cellAdjecntEmpty.length > 0 && !cell.isShown) {
+            if (cell.minesAroundCount > 0 && cellAdjecntEmpty.length > 0 && !cell.isShown && !cell.isMine) {
                 // get rid of flagged cells
                 if (cell.isMarked) {
                     cell.isMarked = !cell.isMarked
