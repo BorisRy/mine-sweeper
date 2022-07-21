@@ -125,7 +125,6 @@ function cellClicked(elCell) {
             }
         }
     }
-
     calcShownAmount()
     isGameWon()
 }
@@ -146,7 +145,6 @@ function onCellRightClick(elCell) {
             gGame.markedCount++
             modelCell.isMarked = !modelCell.isMarked
         }
-
         gFlagCounter.innerText = FLAG + gGame.markedCount.toString()
         elCell.classList.add('covered')
         isGameWon()
@@ -301,7 +299,6 @@ function isGameWon() {
     if (gGame.markedCount === 0 && nonMineCellsAmount === cellsShownAmount) {
         restartButton.innerHTML = '<img src="images/smiling.png">'
         clearInterval(gTimerInterval)
-        console.log(':gDifficulty.size', gDifficulty.size)
         updateHighScore(gGame.secsPassed, gDifficulty.size)
     } else if (gGame.isOn === false) {
         restartButton.innerHTML = '<img src="images/dead.png">'
@@ -315,12 +312,11 @@ function isGameWon() {
 function changeDifficulty(elCell) {
     var elDiffButtons = document.querySelectorAll('.difficulty > p')
     for (var button of elDiffButtons) {
+        console.log('button:', button)
         button.classList.remove('diff-chosen')
+        console.log('button after remove:', button)
     }
     elCell.classList.add('diff-chosen')
-
-
-
     var chosenDiff = elCell.dataset.diff
     var difficulties = [
         { size: 4, mines: 2, lives: 1, hints: 1 },
@@ -341,6 +337,10 @@ function revealAllMines() {
 function resetGame() {
     var restartButton = document.querySelector('#restart')
     var safeClicksLeft = document.querySelector('.clicks-left')
+    var elSafeButton = document.querySelector('p[onclick="safeButton(this)"]')
+    elSafeButton.classList.add('hover-effect')
+    elSafeButton.classList.add('active')
+
     restartButton.innerHTML = '<img src="images/1.png">'
     gGame = {
         isOn: true,

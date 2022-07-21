@@ -2,6 +2,7 @@ body {
     background-color: black;
     color: white;
     font-family: 'Orbitron', sans-serif;
+    zoom: 1.7;
 }
 
 h1{
@@ -50,12 +51,11 @@ h1{
     height: 100%;
     text-align: center;
     margin: auto;
-    background-color: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(to right, #0f0f0f, #202020);
     border-radius: 16px;
     min-width: 500px;
     box-sizing: border-box;
     padding-top:30px;
-    box-shadow: rgb(76, 150, 219) 0px 5px 30px -10px;
 }
 
 .game-board {
@@ -65,6 +65,7 @@ h1{
     margin-right: 0;
     width: fit-content;
     height: fit-content;
+    box-shadow: rgb(76, 150, 219) 0px 5px 30px -10px;
 }
 
 .extra-func {
@@ -73,17 +74,24 @@ h1{
     justify-content: space-evenly;
     margin-top: 30px;
     user-select: none;
+    color: rgb(52, 49, 49);
+    font-weight: 600;
+}
+p[onclick="safeButton(this)"]{
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+}
+
+.active {
+    color: aliceblue;
 }
 
 .hover-effect:hover {
-    color: aliceblue;
     text-shadow: 0px 0px 5px rgba(255, 255, 255, 1);
 }
 
-.extra-func p {
-    display: flex;
-    flex-direction: column;
-}
+
 
 .clicks-left {
     font-size: 0.5em;
@@ -117,7 +125,6 @@ td {
 
 .revealed {
     background-color: linear-gradient(red, yellow);
-    
 }
 
 .mine {

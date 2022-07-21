@@ -15,7 +15,6 @@ function safeButton(elSafeButton) {
                 renderCell({ i: randI, j: randJ }, getGameElement(randCell))
                 setTimeout(() => {
                     var safeClicksLeft = document.querySelector('.clicks-left')
-
                     safeClicksLeft.innerText = 'Clicks left: ' + gSafeLeft
                     renderCell({ i: randI, j: randJ }, EMPTY)
                     elCell.classList.add('covered')
