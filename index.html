@@ -14,21 +14,38 @@
     <body onload="gameInit() " oncontextmenu="return false;">
         <h1>MINE SWEEPER</h1>
         <div class="board-container">
+            <div class="high-score">High Score</div>
             <div class="difficulty">
-                <p data-diff="0" onclick="changeDifficulty(this)">EASY</p>
-                <p data-diff="1" onclick="changeDifficulty(this)">MEDIUM</p>
-                <p data-diff="2" onclick="changeDifficulty(this)">EXPERT</p>
+                <p data-diff="0" id="easy" onclick="changeDifficulty(this)">EASY</p>
+                <p data-diff="1" id="medium" onclick="changeDifficulty(this)">MEDIUM</p>
+                <p data-diff="2" id="hard" onclick="changeDifficulty(this)">EXPERT</p>
             </div>
             <div class="game-info">
                 <p class="time">000</p>
                 <p id="restart" onclick="gameInit()"><img src="images/1.png"> </p>
-                <p class="flags">12</p>
+                <div class="flags-container">
+                    <p class="flags">🚩12</p>
+                </div>
+                
             </div>
-            
-            <table class="game-board"></table>
+            <div class="board-lives-bulbs">
+                <div class="lives"><img class="heart" src="images/heart.png"></div>
+                <table class="game-board"></table>
+                <div class="hints"></div>
+            </div>
+            <div class="extra-func">
+                <p class='hover-effect' onclick="safeButton(this)">Safe Button 
+                    <span class="clicks-left"></span>
+                </p>
+                <p class='hover-effect' onclick="manualMode()">Manual Mode</p>
+                <p class='hover-effect' onclick="prevMove()">Previous Move</p>
+                <p class='hover-effect'>7BOOM</p>
+            </div>
         </div>
         
         <script src="js/utils.js"></script>
+        <script src="manualmode.js"></script>
+        <script src="js/safe-button.js"></script>
         <script src="js/minesweeper.js"></script>
     </body>
 </html>

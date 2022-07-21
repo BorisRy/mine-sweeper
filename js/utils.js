@@ -47,7 +47,6 @@ function renderBoard(board) {
         for (var j = 0; j < row.length; j++) {
             var cell = row[j];
             // figure class name
-
             var tdId = `cell-${i}-${j}`;
 
             strHtml += `<td id="${tdId}" class="${className}" onclick="cellClicked(this)">
@@ -70,20 +69,19 @@ function getEmptyCells(board) {
     }
 }
 
-
-
 function getIdOfCell(location) {
     return `cell-${location.i}-${location.j}`
 }
 
 function getNeighbours(board, cellI, cellJ) {
     var neighbours = []
-    // console.log(`cellI: ${cellI}, cellJ: ${cellJ}`)
     for (var i = cellI - 1; i <= cellI + 1; i++) {
         if (i < 0 || i >= board.length) continue
         for (var j = cellJ - 1; j <= cellJ + 1; j++) {
             if (i === cellI && j === cellJ) continue
             if (j < 0 || j >= board[0].length) continue
+            board[i][j].i = i
+            board[i][j].j = j
             neighbours.push(board[i][j])
         }
     }
