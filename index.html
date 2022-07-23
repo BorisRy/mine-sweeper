@@ -17,7 +17,7 @@
             <div class="high-score">High Score</div>
             <div class="difficulty">
                 <p data-diff="0" id="easy" onclick="changeDifficulty(this)">EASY</p>
-                <p data-diff="1" id="medium" onclick="changeDifficulty(this)">MEDIUM</p>
+                <p data-diff="1" id="medium" class="diff-chosen" onclick="changeDifficulty(this)">MEDIUM</p>
                 <p data-diff="2" id="hard" onclick="changeDifficulty(this)">EXPERT</p>
             </div>
             <div class="game-info">
@@ -37,15 +37,19 @@
                 <p class='hover-effect' onclick="safeButton(this)">Safe Button 
                     <span class="clicks-left"></span>
                 </p>
-                <!-- <p >Manual Mode</p>
-                <p >Previous Move</p>
-                <p >7BOOM</p> -->
+                <p onclick="enterManualMode()" class="activated hover-effect">Manual Mode</p>
+                <p onclick="prevMove()" class="deactivated">Previous Move</p>
+                <p onclick="get7boomMineCoors()" class="activated hover-effect">7-BOOM</p>
             </div>
         </div>
+        <div class="footer">Boris Ryjkov</div>
         
         <script src="js/utils.js"></script>
-        <script src="manualmode.js"></script>
         <script src="js/safe-button.js"></script>
+        <script src="js/high-score.js"></script>
+        <script src="js/previous-move.js"></script>
+        <script src="js/manual-mode.js"></script>
+        <script src="js/seven-boom.js"></script>
         <script src="js/minesweeper.js"></script>
     </body>
 </html>

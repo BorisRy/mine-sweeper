@@ -93,3 +93,10 @@ function getCellLocation(elCell) {
     var j = +elCell.id.split('-')[2]
     return { i, j }
 }
+
+function disableBoardTemporarily(timeInMs) {
+    var timeOut = setTimeout(() => {
+        gGame.isOn = true
+        clearTimeout(timeOut)
+    }, timeInMs)
+}

@@ -11,6 +11,7 @@ var gDifficulty = { size: 8, mines: 12, lives: 3, hints: 3 }
 var gStartTime
 var gTimerInterval
 var gBombRevealInterval
+var gSurprisedFaceTimeout
 var gFlagCounter
 var gHintMode
 var gGame = {
@@ -23,10 +24,7 @@ var gGame = {
 }
 
 function gameInit() {
-    gFlagCounter = document.querySelector('.flags')
     resetGame()
-    renderElements('lives')
-    renderElements('hints')
     gBoard = createBoard(gDifficulty.size, gDifficulty.size)
     renderBoard(gBoard)
 }
@@ -60,54 +58,65 @@ function createBoard(ROWS, COLS) {
     for (var i = 0; i < ROWS; i++) {
         var row = []
         for (var j = 0; j < COLS; j++) {
-            row.push(createCell())
+            row.push(createCell(i, j))
         }
         board.push(row)
     }
     return board
 }
 
-function createCell() {
+function createCell(i, j) {
     return {
         isShown: false,
         minesAroundCount: 0,
         isMarked: false,
-        isMine: false
+        isMine: false,
+        i: i,
+        j: j,
     }
 }
 
 function cellClicked(elCell) {
     var cellLocation = getCellLocation(elCell)
     var modelCell = gBoard[cellLocation.i][cellLocation.j]
-    if (gGame.isOn && !modelCell.isMarked) {
+
+    if (gGame.isOn && !modelCell.isMarked && !gIsManualMode) {
+        saveState(gBoard)
         // first click
-        if (gIsFirstClick) {
-            startTimer()
+        console.log('gIsFirstClick:', gIsFirstClick)
+        if (gIsFirstClick || gIsSevenBoom) {
+            if (!gPrevMoveMode && !gManuallyPlacedMines && !gIsSevenBoom) {
+                placeMinesRandomly(cellLocation, gDifficulty.mines)
+                countMineNeighbours()
+            } else {
+                placeMines(gMinesCoors)
+                countMineNeighbours()
+            }
             gIsFirstClick = false
-            gMinesCoors = []
-            console.log('gDifficulty.mines for cellClicked:', gDifficulty.mines)
-            placeMines(cellLocation, gDifficulty.mines)
-            countMineNeighbours()
+            gIsSevenBoom = false
+            startTimer()
 
         }
-        // if click on empty cell
+
+        // click on empty cell
         if (modelCell.minesAroundCount === 0 && !modelCell.isShown && !gHintMode) {
             revealEmptyCells(cellLocation.i, cellLocation.j)
             revealDigitsWhenHitEmpty()
         }
+        // click with hint mode on
         if (gHintMode && !gIsFirstClick) {
             var hintCells = getNeighbours(gBoard, cellLocation.i, cellLocation.j)
             hintCells.push(modelCell)
             getHintElements(hintCells)
             return
         }
-        // if click on cell with mine nbrs
+        // click on cell with mine neighbors 
         if (modelCell.minesAroundCount !== 0 && !modelCell.isShown && !gHintMode) {
             modelCell.isShown = true
             renderCell(cellLocation, modelCell.minesAroundCount)
             colorDigits(elCell, modelCell.minesAroundCount)
         }
-        // if click on mine
+        // click on mine
         if (modelCell.isMine && !gHintMode) {
             renderCell(cellLocation, MINE)
             if (gGame.lives > 0) {
@@ -115,14 +124,34 @@ function cellClicked(elCell) {
                 hideLastHeart(gGame.lives)
                 gGame.lives--
                 modelCell.isMarked = true
+                modelCell.isMineShown = true
                 gGame.markedCount--
                 gFlagCounter.innerText = FLAG + gGame.markedCount.toString()
-
+                elCell.setAttribute('onclick', '')
             }
             else if (gGame.lives === 0) {
                 gGame.isOn = false
                 revealAllMines()
             }
+        }
+    } else if (gIsManualMode) {
+        if (!modelCell.isMine) {
+            modelCell.isMine = true
+            elCell.innerHTML = getGameElement(modelCell)
+            gMinesCoors.push({ i: cellLocation.i, j: cellLocation.j })
+        } else if (modelCell.isMine) {
+            modelCell.isMine = false
+            elCell.innerHTML = getGameElement(modelCell)
+            // returns a mine coordinate array without the clicked on mine
+            gMinesCoors = gMinesCoors.filter(mine => {
+                return mine.i != cellLocation.i && mine.j != cellLocation.j
+            })
+        }
+        elCell.classList.toggle('mine')
+        if (gMinesCoors.length === gDifficulty.mines) {
+            gIsManualMode = false
+            gManuallyPlacedMines = true
+            hideCells()
         }
     }
     calcShownAmount()
@@ -130,18 +159,20 @@ function cellClicked(elCell) {
 }
 
 function onCellRightClick(elCell) {
+
     var cellLocation = getCellLocation(elCell)
     var modelCell = gBoard[cellLocation.i][cellLocation.j]
     gFlagCounter = document.querySelector('.flags')
-    if (!modelCell.isShown) {
+    if (!modelCell.isShown && !gIsManualMode) {
+        saveState(gBoard)
         if (!modelCell.isMarked) {
             renderCell(cellLocation, FLAG)
-            elCell.setAttribute(onclick, '')
+            elCell.setAttribute('onclick', '')
             gGame.markedCount--
             modelCell.isMarked = !modelCell.isMarked
         } else if (modelCell.isMarked) {
             renderCell(cellLocation, EMPTY)
-            elCell.setAttribute(onclick, '')
+            elCell.setAttribute('onclick', 'cellClicked(this)')
             gGame.markedCount++
             modelCell.isMarked = !modelCell.isMarked
         }
@@ -149,8 +180,7 @@ function onCellRightClick(elCell) {
         elCell.classList.add('covered')
         isGameWon()
     }
-    console.log(gBoard)
-    console.log(getMines())
+
 }
 
 function renderCell(location, value) {
@@ -168,26 +198,22 @@ function renderCell(location, value) {
     elCell.innerHTML = value
 }
 
-function placeMines(initialLocation, numberOfMines) {
+function placeMinesRandomly(initialLocation, numberOfMines) {
     var nbrsOfInitialClicked = getNeighbours(gBoard, initialLocation.i, initialLocation.j)
     // so there won't be a bomb in the initial click
     nbrsOfInitialClicked.push(gBoard[initialLocation.i][initialLocation.j])
     var mines = numberOfMines
-    console.log('numberOfMines from placeMines():', numberOfMines)
+    gMinesCoors = []
     while (mines > 0) {
         var randI = getRandomInt(0, gBoard.length)
         var randJ = getRandomInt(0, gBoard[0].length)
         var cell = gBoard[randI][randJ]
         if (!nbrsOfInitialClicked.includes(cell) && !cell.isMine) {
-            console.log(`mines added: ${mines}`)
-            console.log('cell:', cell)
             cell.isMine = true
             mines--
             gMinesCoors.push({ i: randI, j: randJ })
         }
     }
-    console.log('gMinesCoors:', gMinesCoors)
-    console.log('from placeMines', getMines())
 }
 
 function countMineNeighbours() {
@@ -303,6 +329,7 @@ function isGameWon() {
     console.log('cellsShownAmount:', cellsShownAmount)
     if (gGame.markedCount === 0 && nonMineCellsAmount === cellsShownAmount) {
         restartButton.innerHTML = '<img src="images/smiling.png">'
+        clearTimeout(gSurprisedFaceTimeout)
         clearInterval(gTimerInterval)
         updateHighScore(gGame.secsPassed, gDifficulty.size)
     } else if (gGame.isOn === false) {
@@ -310,16 +337,12 @@ function isGameWon() {
         clearInterval(gTimerInterval)
     }
 }
-// console.log('gGame.markedCount:', gGame.markedCount)
-// console.log('nonMineCellsAmount:', nonMineCellsAmount)
-// console.log('cellsShownAmount:', cellsShownAmount)
+
 
 function changeDifficulty(elCell) {
     var elDiffButtons = document.querySelectorAll('.difficulty > p')
     for (var button of elDiffButtons) {
-        console.log('button:', button)
         button.classList.remove('diff-chosen')
-        console.log('button after remove:', button)
     }
     elCell.classList.add('diff-chosen')
     var chosenDiff = elCell.dataset.diff
@@ -340,16 +363,17 @@ function revealAllMines() {
 }
 
 function resetGame() {
+    var restartButton = document.querySelector('#restart')
+    var safeClicksLeft = document.querySelector('.clicks-left')
     var elSafeButton = document.querySelector('p[onclick="safeButton(this)"]')
-    console.log('elSafeButton:', elSafeButton)
+    var timer = document.querySelector('.time')
+    gFlagCounter = document.querySelector('.flags')
     elSafeButton.classList.remove('deactivated')
     elSafeButton.classList.add('hover-effect')
     elSafeButton.classList.add('active')
-
-
-    var restartButton = document.querySelector('#restart')
-    var safeClicksLeft = document.querySelector('.clicks-left')
     restartButton.innerHTML = '<img src="images/1.png">'
+    timer.innerText = '000'
+
     gGame = {
         isOn: true,
         shownCount: 0,
@@ -358,16 +382,25 @@ function resetGame() {
         lives: 0,
         hints: 3
     }
+
     gIsFirstClick = true
     gSafeLeft = 3
+    safeClicksLeft.innerText = 'Clicks left: ' + gSafeLeft
     gGame.markedCount = gDifficulty.mines
     gGame.lives = gDifficulty.lives
     gGame.hints = gDifficulty.hints
     renderHighScore(gDifficulty.size)
+    renderElements('lives')
+    renderElements('hints')
+    gFlagCounter.innerHTML = FLAG + gGame.markedCount
     gMinesCoors = []
-    var timer = document.querySelector('.time').innerText = '000'
-    gFlagCounter.innerText = FLAG + gGame.markedCount.toString()
-    safeClicksLeft.innerText = 'Clicks left: ' + gSafeLeft
+
+    gGameStates = []
+    gMoveCount = 0
+    gPrevMoveMode = false
+    gIsManualMode = false
+    gManuallyPlacedMines = false
+
     clearInterval(gTimerInterval)
     clearInterval(gBombRevealInterval)
 }
@@ -409,9 +442,9 @@ function hideLastHeart(heartIndex) {
 function showSurprisedFace() {
     var restartButton = document.querySelector('#restart')
     restartButton.innerHTML = '<img src="images/surprised.png"></img>'
-    var timeOut = setTimeout(() => {
+    gSurprisedFaceTimeout = setTimeout(() => {
         restartButton.innerHTML = '<img src="images/1.png"></img>'
-        clearTimeout(timeOut)
+        clearTimeout(gSurprisedFaceTimeout)
     }, 2300)
 }
 
@@ -434,7 +467,6 @@ function giveHint(elBulb) {
     } else {
         document.body.style.cursor = 'auto'
     }
-
 }
 
 function getHintElements(hintCells) {
@@ -447,9 +479,11 @@ function getHintElements(hintCells) {
         var elHintCellId = getIdOfCell({ i: hintCellsNotShown[x].i, j: hintCellsNotShown[x].j })
         var elHintCell = document.querySelector(`#${elHintCellId}`)
         elHintCells.push(elHintCell)
+        console.log('hintCellsNotShown[x]:', hintCellsNotShown[x])
         renderCell({ i: hintCellsNotShown[x].i, j: hintCellsNotShown[x].j },
             getGameElement(hintCellsNotShown[x]))
     }
+
 
     var hideTimeOut = setTimeout(() => {
         for (var x = 0; x < hintCellsNotShown.length; x++) {
@@ -459,8 +493,6 @@ function getHintElements(hintCells) {
             if (hintCellsNotShown[x].isMarked) elHintCells[x].innerText = FLAG
         }
         var elBulb = document.querySelector(`.bulb:nth-of-type(${gGame.hints})`)
-        console.log('gGame.hints:', gGame.hints)
-        console.log('elBulb:', elBulb)
         elBulb.style.visibility = 'hidden'
         document.body.style.cursor = 'auto'
         gGame.hints--
@@ -469,7 +501,6 @@ function getHintElements(hintCells) {
 
         clearTimeout(hideTimeOut)
     }, 1000)
-
 }
 
 function getGameElement(cell) {
@@ -484,30 +515,6 @@ function currDifficultyStr(boardSize) {
     else if (boardSize === 8) difficultyStr = 'medium'
     else if (boardSize === 12) difficultyStr = 'expert'
     return difficultyStr
-}
-
-function updateHighScore(newScore, boardSize) {
-    var difficulty = currDifficultyStr(boardSize)
-
-    var previousHighScore = localStorage.getItem(`${difficulty}HighScore`)
-    if (newScore < previousHighScore || !previousHighScore) {
-        localStorage.setItem(`${difficulty}HighScore`, newScore)
-    }
-    renderHighScore(boardSize)
-}
-
-function renderHighScore(boardSize) {
-    var difficulty = currDifficultyStr(boardSize)
-    var highScoreBox = document.querySelector('.high-score')
-    var highScore = localStorage.getItem(`${difficulty}HighScore`)
-    var difficultyCapitalized = difficulty.charAt(0).toUpperCase() + difficulty.slice(1, difficulty.length)
-
-    if (highScore) {
-        var htmlStr = difficultyCapitalized + ' High Score' + ': ' + highScore
-        highScoreBox.innerText = htmlStr
-    } else if (!highScore) {
-        highScoreBox.innerText = difficultyCapitalized + ' High Score: '
-    }
 }
 
 function calcShownAmount() {
