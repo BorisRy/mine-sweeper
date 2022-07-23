@@ -28,6 +28,10 @@ function revealCells() {
 
 function hideCells() {
     var i = gBoard.length - 1, j = gBoard[0].length - 1
+    var gameBoard = document.querySelector('body')
+    console.log('gameBoard:', gameBoard)
+    gameBoard.style.pointerEvents = 'none'
+    console.log('gameBoard:', gameBoard)
     var revealInterval = setInterval(() => {
         var elCell = document.querySelector(`#${getIdOfCell({ i, j })}`)
         elCell.classList.remove('revealed')
@@ -39,6 +43,8 @@ function hideCells() {
             j = gBoard[0].length - 1
         }
         if (i < 0) clearInterval(revealInterval)
-    }, 20)
+    }, 10)
+
+    setTimeout(() => { gameBoard.style.pointerEvents = 'auto' }, 10 * gDifficulty.size * gDifficulty.size)
 }
 
